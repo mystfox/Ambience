@@ -47,13 +47,13 @@ public final class SongLoader {
 					if(keyType.equals("event")) {
 						String event = tokens[1];
 						
-						SongPicker.eventMap.put(event, props.getProperty(s));
+						SongPicker.eventMap.put(event, props.getProperty(s).split(","));
 					} else if(keyType.equals("biome")) {
 						String biomeName = joinTokensExceptFirst(tokens).replaceAll("\\+", " ");
 						BiomeGenBase biome = BiomeMapper.getBiome(biomeName);
 						
 						if(biome != null)
-							SongPicker.biomeMap.put(biome, props.getProperty(s));
+							SongPicker.biomeMap.put(biome, props.getProperty(s).split(","));
 					} else if(keyType.matches("primarytag|secondarytag")) {
 						boolean primary = keyType.equals("primarytag");
 						String tagName = tokens[1].toUpperCase();
@@ -61,8 +61,8 @@ public final class SongLoader {
 						
 						if(type != null) {
 							if(primary)
-								SongPicker.primaryTagMap.put(type, props.getProperty(s));
-							else SongPicker.secondaryTagMap.put(type, props.getProperty(s));
+								SongPicker.primaryTagMap.put(type, props.getProperty(s).split(","));
+							else SongPicker.secondaryTagMap.put(type, props.getProperty(s).split(","));
 						}
 					}
 				}

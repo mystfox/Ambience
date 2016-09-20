@@ -2,7 +2,9 @@ package vazkii.ambience;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
+import org.apache.commons.lang3.StringUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -49,10 +51,12 @@ public final class SongPicker {
 	public static final String EVENT_PUMPKIN_HEAD = "pumpkinHead";
 	public static final String EVENT_GENERIC = "generic";
 	
-	public static final Map<String, String> eventMap = new HashMap();
-	public static final Map<BiomeGenBase, String> biomeMap = new HashMap();
-	public static final Map<BiomeDictionary.Type, String> primaryTagMap = new HashMap();
-	public static final Map<BiomeDictionary.Type, String> secondaryTagMap = new HashMap();
+	public static final Map<String, String[]> eventMap = new HashMap();
+	public static final Map<BiomeGenBase, String[]> biomeMap = new HashMap();
+	public static final Map<BiomeDictionary.Type, String[]> primaryTagMap = new HashMap();
+	public static final Map<BiomeDictionary.Type, String[]> secondaryTagMap = new HashMap();
+	
+	public static final Random rand = new Random();
 	
 	public static void reset() {
 		eventMap.clear();
@@ -61,13 +65,13 @@ public final class SongPicker {
 		secondaryTagMap.clear();
 	}
 	
-	public static String getSong() {
+	public static String[] getSongs() {
 		Minecraft mc = Minecraft.getMinecraft();
 		EntityPlayer player = mc.thePlayer;
 		World world = mc.theWorld;
 
 		if(player == null || world == null)
-			return getSongForEvent(EVENT_MAIN_MENU);
+			return getSongsForEvent(EVENT_MAIN_MENU);
 		
 		int x = MathHelper.floor_double(player.posX);
 		int y = MathHelper.floor_double(player.posY);
@@ -75,129 +79,128 @@ public final class SongPicker {
 		
 		AmbienceEventEvent event = new AmbienceEventEvent.Pre(world, x, y, z);
 		MinecraftForge.EVENT_BUS.post(event);
-    	String eventr = getSongForEvent(event.event);
+    	String[] eventr = getSongsForEvent(event.event);
     	if(eventr != null)
     		return eventr;
 		
         if(BossStatus.bossName != null && BossStatus.statusBarTime > 0) {
-        	String song = getSongForEvent(EVENT_BOSS);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_BOSS);
+        	if(songs != null)
+        		return songs;
         }
         
         float hp = player.getHealth();
         if(hp < 7) {
-        	String song = getSongForEvent(EVENT_DYING);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_DYING);
+        	if(songs != null)
+        		return songs;
         }
 
 	        int monsterCount = world.getEntitiesWithinAABB(EntityMob.class, AxisAlignedBB.getBoundingBox(player.posX - 16, player.posY - 8, player.posZ - 16, player.posX + 16, player.posY + 8, player.posZ + 16)).size();
 		if(monsterCount > 5) {
-        	String song = getSongForEvent(EVENT_HORDE);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_HORDE);
+        	if(songs != null)
+        		return songs;
 		}
         
         if(player.fishEntity != null) {
-        	String song = getSongForEvent(EVENT_FISHING);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_FISHING);
+        	if(songs != null)
+        		return songs;
         }
         
         ItemStack headItem = player.getEquipmentInSlot(4);
         if(headItem != null && headItem.getItem() == Item.getItemFromBlock(Blocks.pumpkin)) {
-        	String song = getSongForEvent(EVENT_PUMPKIN_HEAD);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_PUMPKIN_HEAD);
+        	if(songs != null)
+        		return songs;
         }
         	int indimension = world.provider.dimensionId;
 
 		if(indimension == -1) {
-		String song = getSongForEvent(EVENT_IN_NETHER);
-	        	if(song != null)
-	        	return song;
+		String[] songs = getSongsForEvent(EVENT_IN_NETHER);
+	        	if(songs != null)
+	        	return songs;
 		} else if(indimension == 1) {
-			String song = getSongForEvent(EVENT_IN_END);
-	        	if(song != null)
-	        	return song;
+			String[] songs = getSongsForEvent(EVENT_IN_END);
+	        	if(songs != null)
+	        	return songs;
 		}
 
 		Entity riding = player.ridingEntity;
 		if(riding != null) {
 			if(riding instanceof EntityMinecart) {
-	        	String song = getSongForEvent(EVENT_MINECART);
-	        	if(song != null)
-	        		return song;
+	        	String[] songs = getSongsForEvent(EVENT_MINECART);
+	        	if(songs != null)
+	        		return songs;
 	        } 
 			if(riding instanceof EntityBoat) {
-	        	String song = getSongForEvent(EVENT_BOAT);
-	        	if(song != null)
-	        		return song;
+	        	String[] songs = getSongsForEvent(EVENT_BOAT);
+	        	if(songs != null)
+	        		return songs;
 	        } 
 			if(riding instanceof EntityHorse) {
-	        	String song = getSongForEvent(EVENT_HORSE);
-	        	if(song != null)
-	        		return song;
+	        	String[] songs = getSongsForEvent(EVENT_HORSE);
+	        	if(songs != null)
+	        		return songs;
 	        } 
 			if(riding instanceof EntityPig) {
-	        	String song = getSongForEvent(EVENT_PIG);
-	        	if(song != null)
-	        		return song;
+	        	String[] songs = getSongsForEvent(EVENT_PIG);
+	        	if(songs != null)
+	        		return songs;
 	        }
 		}
 		
 		if(player.isInsideOfMaterial(Material.water)) {
-        	String song = getSongForEvent(EVENT_UNDERWATER);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_UNDERWATER);
+        	if(songs != null)
+        		return songs;
 		}
 		
 		boolean underground = !world.canBlockSeeTheSky(x, y, z); 
 		if(underground) {
 			if(y < 20) {
-	        	String song = getSongForEvent(EVENT_DEEP_UNDEGROUND);
-	        	if(song != null)
-	        		return song;
+	        	String[] songs = getSongsForEvent(EVENT_DEEP_UNDEGROUND);
+	        	if(songs != null)
+	        		return songs;
 	        }
 			if(y < 55) {
-	        	String song = getSongForEvent(EVENT_UNDERGROUND);
-	        	if(song != null)
-	        		return song;
+	        	String[] songs = getSongsForEvent(EVENT_UNDERGROUND);
+	        	if(songs != null)
+	        		return songs;
 	        }
 		}  
 
 		if(world.isRaining()) {
-        	String song = getSongForEvent(EVENT_RAIN);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_RAIN);
+        	if(songs != null)
+        		return songs;
 		}
 		
 		if(y > 128) {
-        	String song = getSongForEvent(EVENT_HIGH_UP);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_HIGH_UP);
+        	if(songs != null)
         }
 		
 		long time = world.getWorldTime() % 24000;
 		if(time > 13300 && time < 23200) {
-        	String song = getSongForEvent(EVENT_NIGHT);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_NIGHT);
+        	if(songs != null)
+        		return songs;
         }
 		
 		int villagerCount = world.getEntitiesWithinAABB(EntityVillager.class, AxisAlignedBB.getBoundingBox(player.posX - 30, player.posY - 8, player.posZ - 30, player.posX + 30, player.posY + 8, player.posZ + 30)).size();
 		if(villagerCount > 3) {
-        	String song = getSongForEvent(EVENT_VILLAGE);
-        	if(song != null)
-        		return song;
+        	String[] songs = getSongsForEvent(EVENT_VILLAGE);
+        	if(songs != null)
+        		return songs;
 		}
 
 
 		
 		event = new AmbienceEventEvent.Post(world, x, y, z);
 		MinecraftForge.EVENT_BUS.post(event);
-    	eventr = getSongForEvent(event.event);
+    	eventr = getSongsForEvent(event.event);
     	if(eventr != null)
     		return eventr;
 		
@@ -216,10 +219,20 @@ public final class SongPicker {
             		return secondaryTagMap.get(t);
         }
         
-        return getSongForEvent(EVENT_GENERIC);
+        return getSongsForEvent(EVENT_GENERIC);
 	}
 	
-	public static String getSongForEvent(String event) {
+	public static String getSongsString() {
+		return StringUtils.join(getSongs(), ",");
+	}
+	
+	public static String getRandomSong() {
+		String[] songChoices = getSongs();
+		
+		return songChoices[rand.nextInt(songChoices.length)];
+	}
+	
+	public static String[] getSongsForEvent(String event) {
 		if(eventMap.containsKey(event))
 			return eventMap.get(event);
 		
@@ -233,5 +246,4 @@ public final class SongPicker {
 	public static String getSongName(String song) {
 		return song == null ? "" : song.replaceAll("([^A-Z])([A-Z])", "$1 $2");
 	}
-	
 }
