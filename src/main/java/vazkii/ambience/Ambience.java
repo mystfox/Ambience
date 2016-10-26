@@ -43,6 +43,8 @@ public class Ambience {
 	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) return;
+
 		FMLCommonHandler.instance().bus().register(this);
 		MinecraftForge.EVENT_BUS.register(this);
 		
@@ -59,6 +61,8 @@ public class Ambience {
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) return;
+
 		Minecraft mc = Minecraft.getMinecraft();
 		MusicTicker ticker = new NilMusicTicker(mc);
 		ReflectionHelper.setPrivateValue(Minecraft.class, mc, ticker, "mcMusicTicker", "field_147126_aw", "ax");
