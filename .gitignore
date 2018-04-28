@@ -26,3 +26,8 @@ Thumbs.db
 ## Jars
 *.jar
 !/gradle/wrapper/gradle-wrapper.jar
+
+## Files from running
+eclipse/config/
+eclipse/logs/
+eclipse/ambience_music/
